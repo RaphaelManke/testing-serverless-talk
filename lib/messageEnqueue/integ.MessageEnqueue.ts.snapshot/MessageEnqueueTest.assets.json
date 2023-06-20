@@ -1,0 +1,19 @@
+{
+  "version": "32.0.0",
+  "files": {
+    "40709e26376e07968ad7b4b633696ff63533e918148405173abf7141d68dae47": {
+      "source": {
+        "path": "MessageEnqueueTest.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "40709e26376e07968ad7b4b633696ff63533e918148405173abf7141d68dae47.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

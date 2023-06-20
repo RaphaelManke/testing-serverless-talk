@@ -1,0 +1,646 @@
+{
+  "version": "tree-0.1",
+  "tree": {
+    "id": "App",
+    "path": "",
+    "children": {
+      "MessageEnqueueTest": {
+        "id": "MessageEnqueueTest",
+        "path": "MessageEnqueueTest",
+        "children": {
+          "Table": {
+            "id": "Table",
+            "path": "MessageEnqueueTest/Table",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "MessageEnqueueTest/Table/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::DynamoDB::Table",
+                  "aws:cdk:cloudformation:props": {
+                    "keySchema": [
+                      {
+                        "attributeName": "id",
+                        "keyType": "HASH"
+                      }
+                    ],
+                    "attributeDefinitions": [
+                      {
+                        "attributeName": "id",
+                        "attributeType": "S"
+                      }
+                    ],
+                    "billingMode": "PAY_PER_REQUEST",
+                    "streamSpecification": {
+                      "streamViewType": "NEW_AND_OLD_IMAGES"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_dynamodb.CfnTable",
+                  "version": "2.84.0"
+                }
+              },
+              "ScalingRole": {
+                "id": "ScalingRole",
+                "path": "MessageEnqueueTest/Table/ScalingRole",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Resource",
+                  "version": "2.84.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_dynamodb.Table",
+              "version": "2.84.0"
+            }
+          },
+          "MessageEnqueue": {
+            "id": "MessageEnqueue",
+            "path": "MessageEnqueueTest/MessageEnqueue",
+            "children": {
+              "Queue": {
+                "id": "Queue",
+                "path": "MessageEnqueueTest/MessageEnqueue/Queue",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "MessageEnqueueTest/MessageEnqueue/Queue/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::SQS::Queue",
+                      "aws:cdk:cloudformation:props": {}
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_sqs.CfnQueue",
+                      "version": "2.84.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_sqs.Queue",
+                  "version": "2.84.0"
+                }
+              },
+              "Pipe": {
+                "id": "Pipe",
+                "path": "MessageEnqueueTest/MessageEnqueue/Pipe",
+                "children": {
+                  "Role": {
+                    "id": "Role",
+                    "path": "MessageEnqueueTest/MessageEnqueue/Pipe/Role",
+                    "children": {
+                      "ImportRole": {
+                        "id": "ImportRole",
+                        "path": "MessageEnqueueTest/MessageEnqueue/Pipe/Role/ImportRole",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.Resource",
+                          "version": "2.84.0"
+                        }
+                      },
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "MessageEnqueueTest/MessageEnqueue/Pipe/Role/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                          "aws:cdk:cloudformation:props": {
+                            "assumeRolePolicyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": "sts:AssumeRole",
+                                  "Effect": "Allow",
+                                  "Principal": {
+                                    "Service": "pipes.amazonaws.com"
+                                  }
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                          "version": "2.84.0"
+                        }
+                      },
+                      "DefaultPolicy": {
+                        "id": "DefaultPolicy",
+                        "path": "MessageEnqueueTest/MessageEnqueue/Pipe/Role/DefaultPolicy",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "MessageEnqueueTest/MessageEnqueue/Pipe/Role/DefaultPolicy/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                              "aws:cdk:cloudformation:props": {
+                                "policyDocument": {
+                                  "Statement": [
+                                    {
+                                      "Action": "dynamodb:ListStreams",
+                                      "Effect": "Allow",
+                                      "Resource": "*"
+                                    },
+                                    {
+                                      "Action": [
+                                        "dynamodb:DescribeStream",
+                                        "dynamodb:GetRecords",
+                                        "dynamodb:GetShardIterator"
+                                      ],
+                                      "Effect": "Allow",
+                                      "Resource": {
+                                        "Fn::GetAtt": [
+                                          "TableCD117FA1",
+                                          "StreamArn"
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "Action": [
+                                        "sqs:GetQueueAttributes",
+                                        "sqs:GetQueueUrl",
+                                        "sqs:SendMessage"
+                                      ],
+                                      "Effect": "Allow",
+                                      "Resource": {
+                                        "Fn::GetAtt": [
+                                          "MessageEnqueueQueueD0ABEE94",
+                                          "Arn"
+                                        ]
+                                      }
+                                    }
+                                  ],
+                                  "Version": "2012-10-17"
+                                },
+                                "policyName": "MessageEnqueuePipeRoleDefaultPolicy9C5E3A54",
+                                "roles": [
+                                  {
+                                    "Ref": "MessageEnqueuePipeRole76AC74C3"
+                                  }
+                                ]
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                              "version": "2.84.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.Policy",
+                          "version": "2.84.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Role",
+                      "version": "2.84.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "MessageEnqueueTest/MessageEnqueue/Pipe/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::Pipes::Pipe",
+                      "aws:cdk:cloudformation:props": {
+                        "roleArn": {
+                          "Fn::GetAtt": [
+                            "MessageEnqueuePipeRole76AC74C3",
+                            "Arn"
+                          ]
+                        },
+                        "source": {
+                          "Fn::GetAtt": [
+                            "TableCD117FA1",
+                            "StreamArn"
+                          ]
+                        },
+                        "target": {
+                          "Fn::GetAtt": [
+                            "MessageEnqueueQueueD0ABEE94",
+                            "Arn"
+                          ]
+                        },
+                        "sourceParameters": {
+                          "dynamoDbStreamParameters": {
+                            "startingPosition": "TRIM_HORIZON"
+                          }
+                        },
+                        "targetParameters": {
+                          "inputTemplate": "{\"id\":<$.dynamodb.NewImage.id.S>}",
+                          "sqsQueueParameters": {}
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_pipes.CfnPipe",
+                      "version": "2.84.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "@raphaelmanke/aws-cdk-pipes-rfc.Pipe",
+                  "version": "0.0.16"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "constructs.Construct",
+              "version": "10.2.52"
+            }
+          },
+          "Exports": {
+            "id": "Exports",
+            "path": "MessageEnqueueTest/Exports",
+            "children": {
+              "Output{\"Ref\":\"TableCD117FA1\"}": {
+                "id": "Output{\"Ref\":\"TableCD117FA1\"}",
+                "path": "MessageEnqueueTest/Exports/Output{\"Ref\":\"TableCD117FA1\"}",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnOutput",
+                  "version": "2.84.0"
+                }
+              },
+              "Output{\"Ref\":\"MessageEnqueueQueueD0ABEE94\"}": {
+                "id": "Output{\"Ref\":\"MessageEnqueueQueueD0ABEE94\"}",
+                "path": "MessageEnqueueTest/Exports/Output{\"Ref\":\"MessageEnqueueQueueD0ABEE94\"}",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnOutput",
+                  "version": "2.84.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "constructs.Construct",
+              "version": "10.2.52"
+            }
+          },
+          "BootstrapVersion": {
+            "id": "BootstrapVersion",
+            "path": "MessageEnqueueTest/BootstrapVersion",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnParameter",
+              "version": "2.84.0"
+            }
+          },
+          "CheckBootstrapVersion": {
+            "id": "CheckBootstrapVersion",
+            "path": "MessageEnqueueTest/CheckBootstrapVersion",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnRule",
+              "version": "2.84.0"
+            }
+          }
+        },
+        "constructInfo": {
+          "fqn": "aws-cdk-lib.Stack",
+          "version": "2.84.0"
+        }
+      },
+      "DbToSqs": {
+        "id": "DbToSqs",
+        "path": "DbToSqs",
+        "children": {
+          "DefaultTest": {
+            "id": "DefaultTest",
+            "path": "DbToSqs/DefaultTest",
+            "children": {
+              "Default": {
+                "id": "Default",
+                "path": "DbToSqs/DefaultTest/Default",
+                "constructInfo": {
+                  "fqn": "constructs.Construct",
+                  "version": "10.2.52"
+                }
+              },
+              "DeployAssert": {
+                "id": "DeployAssert",
+                "path": "DbToSqs/DefaultTest/DeployAssert",
+                "children": {
+                  "AwsApiCallDynamoDBputItem270e4ddc04f3bc626c4156f6222b7d7d": {
+                    "id": "AwsApiCallDynamoDBputItem270e4ddc04f3bc626c4156f6222b7d7d",
+                    "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallDynamoDBputItem270e4ddc04f3bc626c4156f6222b7d7d",
+                    "children": {
+                      "SdkProvider": {
+                        "id": "SdkProvider",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallDynamoDBputItem270e4ddc04f3bc626c4156f6222b7d7d/SdkProvider",
+                        "children": {
+                          "AssertionsProvider": {
+                            "id": "AssertionsProvider",
+                            "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallDynamoDBputItem270e4ddc04f3bc626c4156f6222b7d7d/SdkProvider/AssertionsProvider",
+                            "constructInfo": {
+                              "fqn": "constructs.Construct",
+                              "version": "10.2.52"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "@aws-cdk/integ-tests-alpha.AssertionsProvider",
+                          "version": "2.84.0-alpha.0"
+                        }
+                      },
+                      "Default": {
+                        "id": "Default",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallDynamoDBputItem270e4ddc04f3bc626c4156f6222b7d7d/Default",
+                        "children": {
+                          "Default": {
+                            "id": "Default",
+                            "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallDynamoDBputItem270e4ddc04f3bc626c4156f6222b7d7d/Default/Default",
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.CfnResource",
+                              "version": "2.84.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.CustomResource",
+                          "version": "2.84.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "@aws-cdk/integ-tests-alpha.AwsApiCall",
+                      "version": "2.84.0-alpha.0"
+                    }
+                  },
+                  "SingletonFunction1488541a7b23466481b69b4408076b81": {
+                    "id": "SingletonFunction1488541a7b23466481b69b4408076b81",
+                    "path": "DbToSqs/DefaultTest/DeployAssert/SingletonFunction1488541a7b23466481b69b4408076b81",
+                    "children": {
+                      "Staging": {
+                        "id": "Staging",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/SingletonFunction1488541a7b23466481b69b4408076b81/Staging",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.AssetStaging",
+                          "version": "2.84.0"
+                        }
+                      },
+                      "Role": {
+                        "id": "Role",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/SingletonFunction1488541a7b23466481b69b4408076b81/Role",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.CfnResource",
+                          "version": "2.84.0"
+                        }
+                      },
+                      "Handler": {
+                        "id": "Handler",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/SingletonFunction1488541a7b23466481b69b4408076b81/Handler",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.CfnResource",
+                          "version": "2.84.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "constructs.Construct",
+                      "version": "10.2.52"
+                    }
+                  },
+                  "AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810": {
+                    "id": "AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810",
+                    "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810",
+                    "children": {
+                      "SdkProvider": {
+                        "id": "SdkProvider",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810/SdkProvider",
+                        "children": {
+                          "AssertionsProvider": {
+                            "id": "AssertionsProvider",
+                            "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810/SdkProvider/AssertionsProvider",
+                            "constructInfo": {
+                              "fqn": "constructs.Construct",
+                              "version": "10.2.52"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "@aws-cdk/integ-tests-alpha.AssertionsProvider",
+                          "version": "2.84.0-alpha.0"
+                        }
+                      },
+                      "Default": {
+                        "id": "Default",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810/Default",
+                        "children": {
+                          "Default": {
+                            "id": "Default",
+                            "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810/Default/Default",
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.CfnResource",
+                              "version": "2.84.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.CustomResource",
+                          "version": "2.84.0"
+                        }
+                      },
+                      "WaitFor": {
+                        "id": "WaitFor",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810/WaitFor",
+                        "children": {
+                          "IsCompleteProvider": {
+                            "id": "IsCompleteProvider",
+                            "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810/WaitFor/IsCompleteProvider",
+                            "children": {
+                              "AssertionsProvider": {
+                                "id": "AssertionsProvider",
+                                "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810/WaitFor/IsCompleteProvider/AssertionsProvider",
+                                "constructInfo": {
+                                  "fqn": "constructs.Construct",
+                                  "version": "10.2.52"
+                                }
+                              },
+                              "Invoke": {
+                                "id": "Invoke",
+                                "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810/WaitFor/IsCompleteProvider/Invoke",
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.CfnResource",
+                                  "version": "2.84.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "@aws-cdk/integ-tests-alpha.AssertionsProvider",
+                              "version": "2.84.0-alpha.0"
+                            }
+                          },
+                          "TimeoutProvider": {
+                            "id": "TimeoutProvider",
+                            "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810/WaitFor/TimeoutProvider",
+                            "children": {
+                              "AssertionsProvider": {
+                                "id": "AssertionsProvider",
+                                "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810/WaitFor/TimeoutProvider/AssertionsProvider",
+                                "constructInfo": {
+                                  "fqn": "constructs.Construct",
+                                  "version": "10.2.52"
+                                }
+                              },
+                              "Invoke": {
+                                "id": "Invoke",
+                                "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810/WaitFor/TimeoutProvider/Invoke",
+                                "constructInfo": {
+                                  "fqn": "aws-cdk-lib.CfnResource",
+                                  "version": "2.84.0"
+                                }
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "@aws-cdk/integ-tests-alpha.AssertionsProvider",
+                              "version": "2.84.0-alpha.0"
+                            }
+                          },
+                          "Role": {
+                            "id": "Role",
+                            "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810/WaitFor/Role",
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.CfnResource",
+                              "version": "2.84.0"
+                            }
+                          },
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810/WaitFor/Resource",
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.CfnResource",
+                              "version": "2.84.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "@aws-cdk/integ-tests-alpha.WaiterStateMachine",
+                          "version": "2.84.0-alpha.0"
+                        }
+                      },
+                      "AssertionResults": {
+                        "id": "AssertionResults",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/AwsApiCallSQSreceiveMessaged2e35292b8f12218cb3ac41b93a4a810/AssertionResults",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.CfnOutput",
+                          "version": "2.84.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "@aws-cdk/integ-tests-alpha.AwsApiCall",
+                      "version": "2.84.0-alpha.0"
+                    }
+                  },
+                  "SingletonFunction76b3e830a873425f8453eddd85c86925": {
+                    "id": "SingletonFunction76b3e830a873425f8453eddd85c86925",
+                    "path": "DbToSqs/DefaultTest/DeployAssert/SingletonFunction76b3e830a873425f8453eddd85c86925",
+                    "children": {
+                      "Staging": {
+                        "id": "Staging",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/SingletonFunction76b3e830a873425f8453eddd85c86925/Staging",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.AssetStaging",
+                          "version": "2.84.0"
+                        }
+                      },
+                      "Role": {
+                        "id": "Role",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/SingletonFunction76b3e830a873425f8453eddd85c86925/Role",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.CfnResource",
+                          "version": "2.84.0"
+                        }
+                      },
+                      "Handler": {
+                        "id": "Handler",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/SingletonFunction76b3e830a873425f8453eddd85c86925/Handler",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.CfnResource",
+                          "version": "2.84.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "constructs.Construct",
+                      "version": "10.2.52"
+                    }
+                  },
+                  "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41a": {
+                    "id": "SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41a",
+                    "path": "DbToSqs/DefaultTest/DeployAssert/SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41a",
+                    "children": {
+                      "Staging": {
+                        "id": "Staging",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41a/Staging",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.AssetStaging",
+                          "version": "2.84.0"
+                        }
+                      },
+                      "Role": {
+                        "id": "Role",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41a/Role",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.CfnResource",
+                          "version": "2.84.0"
+                        }
+                      },
+                      "Handler": {
+                        "id": "Handler",
+                        "path": "DbToSqs/DefaultTest/DeployAssert/SingletonFunction5c1898e096fb4e3e95d5f6c67f3ce41a/Handler",
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.CfnResource",
+                          "version": "2.84.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "constructs.Construct",
+                      "version": "10.2.52"
+                    }
+                  },
+                  "BootstrapVersion": {
+                    "id": "BootstrapVersion",
+                    "path": "DbToSqs/DefaultTest/DeployAssert/BootstrapVersion",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.CfnParameter",
+                      "version": "2.84.0"
+                    }
+                  },
+                  "CheckBootstrapVersion": {
+                    "id": "CheckBootstrapVersion",
+                    "path": "DbToSqs/DefaultTest/DeployAssert/CheckBootstrapVersion",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.CfnRule",
+                      "version": "2.84.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Stack",
+                  "version": "2.84.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "@aws-cdk/integ-tests-alpha.IntegTestCase",
+              "version": "2.84.0-alpha.0"
+            }
+          }
+        },
+        "constructInfo": {
+          "fqn": "@aws-cdk/integ-tests-alpha.IntegTest",
+          "version": "2.84.0-alpha.0"
+        }
+      },
+      "Tree": {
+        "id": "Tree",
+        "path": "Tree",
+        "constructInfo": {
+          "fqn": "constructs.Construct",
+          "version": "10.2.52"
+        }
+      }
+    },
+    "constructInfo": {
+      "fqn": "aws-cdk-lib.App",
+      "version": "2.84.0"
+    }
+  }
+}

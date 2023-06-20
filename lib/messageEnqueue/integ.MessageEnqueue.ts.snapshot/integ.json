@@ -1,0 +1,12 @@
+{
+  "version": "32.0.0",
+  "testCases": {
+    "DbToSqs/DefaultTest": {
+      "stacks": [
+        "MessageEnqueueTest"
+      ],
+      "assertionStack": "DbToSqs/DefaultTest/DeployAssert",
+      "assertionStackName": "DbToSqsDefaultTestDeployAssert5F922CDF"
+    }
+  }
+}

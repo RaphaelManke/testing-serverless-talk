@@ -1,0 +1,182 @@
+{
+ "Resources": {
+  "TableCD117FA1": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "KeySchema": [
+     {
+      "AttributeName": "id",
+      "KeyType": "HASH"
+     }
+    ],
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "id",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "StreamSpecification": {
+     "StreamViewType": "NEW_AND_OLD_IMAGES"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "MessageEnqueueQueueD0ABEE94": {
+   "Type": "AWS::SQS::Queue",
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete"
+  },
+  "MessageEnqueuePipeRole76AC74C3": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "pipes.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   }
+  },
+  "MessageEnqueuePipeRoleDefaultPolicy9C5E3A54": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "dynamodb:ListStreams",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "dynamodb:DescribeStream",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "TableCD117FA1",
+         "StreamArn"
+        ]
+       }
+      },
+      {
+       "Action": [
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl",
+        "sqs:SendMessage"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "MessageEnqueueQueueD0ABEE94",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "MessageEnqueuePipeRoleDefaultPolicy9C5E3A54",
+    "Roles": [
+     {
+      "Ref": "MessageEnqueuePipeRole76AC74C3"
+     }
+    ]
+   }
+  },
+  "MessageEnqueuePipe303BE88A": {
+   "Type": "AWS::Pipes::Pipe",
+   "Properties": {
+    "RoleArn": {
+     "Fn::GetAtt": [
+      "MessageEnqueuePipeRole76AC74C3",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "Fn::GetAtt": [
+      "TableCD117FA1",
+      "StreamArn"
+     ]
+    },
+    "Target": {
+     "Fn::GetAtt": [
+      "MessageEnqueueQueueD0ABEE94",
+      "Arn"
+     ]
+    },
+    "SourceParameters": {
+     "DynamoDBStreamParameters": {
+      "StartingPosition": "TRIM_HORIZON"
+     }
+    },
+    "TargetParameters": {
+     "InputTemplate": "{\"id\":<$.dynamodb.NewImage.id.S>}",
+     "SqsQueueParameters": {}
+    }
+   }
+  }
+ },
+ "Outputs": {
+  "ExportsOutputRefTableCD117FA1D18A8047": {
+   "Value": {
+    "Ref": "TableCD117FA1"
+   },
+   "Export": {
+    "Name": "MessageEnqueueTest:ExportsOutputRefTableCD117FA1D18A8047"
+   }
+  },
+  "ExportsOutputRefMessageEnqueueQueueD0ABEE94CC1BF05A": {
+   "Value": {
+    "Ref": "MessageEnqueueQueueD0ABEE94"
+   },
+   "Export": {
+    "Name": "MessageEnqueueTest:ExportsOutputRefMessageEnqueueQueueD0ABEE94CC1BF05A"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

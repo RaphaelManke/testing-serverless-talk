@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should have a post order route 1`] = `
+{
+  "Apiorders48D17054": {
+    "Properties": {
+      "ParentId": {
+        "Fn::GetAtt": [
+          "ApiCD79AAA0",
+          "RootResourceId",
+        ],
+      },
+      "PathPart": "orders",
+      "RestApiId": {
+        "Ref": "ApiCD79AAA0",
+      },
+    },
+    "Type": "AWS::ApiGateway::Resource",
+  },
+}
+`;
